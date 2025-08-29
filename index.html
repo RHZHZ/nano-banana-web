@@ -495,6 +495,12 @@
             flex: 1;
         }
 
+        .settings-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .status-indicator {
             padding: 4px 12px;
             border-radius: 20px;
@@ -600,6 +606,7 @@
 
         .alert {
             padding: 15px;
+            float: center;
             border-radius: 10px;
             margin-bottom: 20px;
             display: none;
@@ -651,8 +658,10 @@
             <i id="darkModeIcon" class="fas fa-sun"></i>
         </div>
     </div>
-
+ <!-- Floating Alert -->
+        <div id="alert" class="alert"></div>
     <div class="container">
+
         <div class="header">
             <h1><i class="fas fa-magic"></i> AI创意图片处理</h1>
             <p>基于 Gemini 2.5 Flash Image Preview 的强大AI绘图能力</p>
@@ -878,19 +887,21 @@
                                placeholder="请输入您的 API Key">
                     </div>
                 </div>
+                <div class="settings-actions">
                 <button class="btn btn-primary" onclick="saveSettings()">
                     <i class="fas fa-save"></i> 保存设置
                 </button>
-                <button class="btn btn-secondary" onclick="testApiConnection()" style="margin-left: 10px;">
+                    <button class="btn btn-secondary" onclick="testApiConnection()">
                     <i class="fas fa-plug"></i> 测试连接
                 </button>
-                <button class="btn btn-secondary" onclick="importSettings()" style="margin-left: 10px; background: #17a2b8;">
-                    <i class="fas fa-upload"></i> 导入配置
-                </button>
-                <button class="btn btn-secondary" onclick="exportSettings()" style="margin-left: 10px; background: #28a745;">
-                    <i class="fas fa-download"></i> 导出配置
-                </button>
-                <input type="file" id="settingsImport" accept=".json" style="display: none;" onchange="handleSettingsImport(this)">
+                    <button class="btn btn-secondary" onclick="importSettings()" style="background: #17a2b8;">
+                        <i class="fas fa-upload"></i> 导入配置
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSettings()" style="background: #28a745;">
+                        <i class="fas fa-download"></i> 导出配置
+                    </button>
+                    <input type="file" id="settingsImport" accept=".json" style="display: none;" onchange="handleSettingsImport(this)">
+                </div>
             </div>
 
             <div class="card">
@@ -995,8 +1006,8 @@
                         <div class="author-details">
                             <h4>关于作者</h4>
                             <p>本工具由 RHZ 创建，旨在探索AI在创意图片生成领域的可能性。如果您觉得这个工具有用，请分享给大家！</p>
-                        </div>
-                    </div>
+            </div>
+        </div>
                     <div class="donation-info">
                         <h4>支持公益</h4>
                         <p>您的捐款将全部用于支持<strong>后续开发</strong>以及免费分享。感谢您的善意！</p>
@@ -1009,8 +1020,9 @@
             </div>
         </div>
 
-        <div id="alert" class="alert"></div>
     </div>
+
+   
 
     <!-- Image Preview Modal -->
     <div id="imageModal" class="modal">
