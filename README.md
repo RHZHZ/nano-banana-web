@@ -1,6 +1,7 @@
 # AI 创意图片处理工作台
 <img width="1385" height="1305" alt="image" src="https://github.com/user-attachments/assets/5ca65e4d-2bc2-4428-a01a-cc843d2944a2" />
 这是一个功能强大的纯前端AI图片处理工具，基于强大的生成式AI模型（如Google的Gemini系列），让您可以在浏览器中轻松实现专业级的图片生成与编辑。
+
 <img width="432" height="592" alt="image" src="https://github.com/user-attachments/assets/a5da8060-c877-4d46-8d9e-156590add09a" />
 
 ## ✨ 功能亮点
