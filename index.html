@@ -755,6 +755,13 @@
                 <button class="btn btn-secondary" onclick="testApiConnection()" style="margin-left: 10px;">
                     <i class="fas fa-plug"></i> 测试连接
                 </button>
+                <button class="btn btn-secondary" onclick="importSettings()" style="margin-left: 10px; background: #17a2b8;">
+                    <i class="fas fa-upload"></i> 导入配置
+                </button>
+                <button class="btn btn-secondary" onclick="exportSettings()" style="margin-left: 10px; background: #28a745;">
+                    <i class="fas fa-download"></i> 导出配置
+                </button>
+                <input type="file" id="settingsImport" accept=".json" style="display: none;" onchange="handleSettingsImport(this)">
             </div>
 
             <div class="card">
@@ -882,6 +889,21 @@
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <div id="modalBody" class="modal-body">
                 <!-- Modal content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- First Use Welcome Modal -->
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content" style="max-width: 500px; text-align: center;">
+            <span class="modal-close" onclick="closeWelcomeModal()">&times;</span>
+            <div class="modal-body" style="flex-direction: column;">
+                <i class="fas fa-rocket" style="font-size: 3rem; color: #667eea; margin-bottom: 15px;"></i>
+                <h2>欢迎使用 AI 创意图片处理！</h2>
+                <p style="margin: 15px 0; color: #555;">为了开始您的创作之旅，请先配置您的 API 信息。</p>
+                <button class="btn btn-primary" onclick="goToSettings()">
+                    <i class="fas fa-cog"></i> 前往配置
+                </button>
             </div>
         </div>
     </div>
@@ -2314,6 +2336,54 @@
             showAlert('已删除历史记录', 'success');
         }
 
+        // Settings Import/Export
+        function exportSettings() {
+            const settings = getSettings();
+            const dataStr = JSON.stringify(settings, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ai-settings-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showAlert('配置导出成功', 'success');
+        }
+
+        function importSettings() {
+            document.getElementById('settingsImport').click();
+        }
+
+        function handleSettingsImport(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedSettings = JSON.parse(e.target.result);
+                        // Validate and apply settings
+                        if (importedSettings.apiUrl && importedSettings.apiKey) {
+                            document.getElementById('apiUrl').value = importedSettings.apiUrl;
+                            document.getElementById('apiKey').value = importedSettings.apiKey;
+                            document.getElementById('modelName').value = importedSettings.modelName || 'gemini-2.5-flash-image-preview';
+                            document.getElementById('maxTokens').value = importedSettings.maxTokens || 1000;
+                            document.getElementById('temperature').value = importedSettings.temperature || 0.7;
+                            document.getElementById('debugMode').checked = importedSettings.debugMode || false;
+                            saveSettings();
+                            showAlert('配置导入成功', 'success');
+                        } else {
+                            throw new Error('无效的配置文件格式');
+                        }
+                    } catch (error) {
+                        showAlert('导入失败：' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
         // 清空历史记录
         function clearHistory() {
             if (confirm('确定要清空所有相册记录吗？此操作不可撤销。')) {
@@ -2444,12 +2514,40 @@
             loadSettings();
             loadHistory();
             loadPromptTemplates();
+            checkFirstUse();
             
             // 自动检查API状态
             setTimeout(() => {
                 // autoCheckApiStatus();
             }, 1000);
         });
+
+        // 检查是否首次使用
+        function checkFirstUse() {
+            const settings = getSettings();
+            if (!settings.apiUrl || !settings.apiKey) {
+                const welcomeModal = document.getElementById('welcomeModal');
+                welcomeModal.style.display = 'block';
+            }
+        }
+
+        // 关闭欢迎弹窗
+        function closeWelcomeModal() {
+            const welcomeModal = document.getElementById('welcomeModal');
+            welcomeModal.style.display = 'none';
+        }
+
+        // 跳转到设置页面
+        function goToSettings() {
+            closeWelcomeModal();
+            // Manually find the settings tab button to click it
+            const tabs = document.querySelectorAll('.nav-tabs .nav-tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.includes('设置')) {
+                    tab.click();
+                }
+            });
+        }
 
         // 自动检查API状态
         async function autoCheckApiStatus() {
