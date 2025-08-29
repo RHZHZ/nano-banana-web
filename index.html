@@ -1,0 +1,2695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI创意图片处理 - Gemini 2.5 Flash</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 5px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            margin: 0 5px;
+            background: transparent;
+            border: none;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .nav-tab.active {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        /* Style for inner tabs inside a card */
+        .card .nav-tabs {
+            background: #e9ecef; /* A light grey background */
+            border-radius: 10px;
+            padding: 5px;
+            backdrop-filter: none; /* Remove backdrop filter */
+        }
+
+        .card .nav-tab {
+            color: #495057; /* Darker text color for readability */
+            background: transparent;
+        }
+
+        .card .nav-tab.active {
+            background: white; /* White background for active tab */
+            color: #667eea; /* Use primary color for text */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card .nav-tab:hover {
+            background: #f8f9fa; /* Lighter grey on hover */
+            color: #495057;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .image-upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .image-upload-area:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .image-upload-area i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .history-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .history-info {
+            flex: 1;
+        }
+
+        .history-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .history-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* New History Gallery Styles */
+        .history-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .gallery-info {
+            padding: 15px;
+        }
+
+        .gallery-prompt {
+            font-size: 0.9rem;
+            color: #333;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .gallery-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .gallery-actions .btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Modal for Image Preview */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            color: white;
+            background: #dc3545;
+            font-size: 24px;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .modal-body {
+            display: flex;
+            gap: 20px;
+        }
+
+        .modal-image-container {
+            flex: 2;
+            text-align: center;
+        }
+
+        .modal-image-container img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        .modal-details {
+            flex: 1;
+        }
+
+        /* New History Gallery Styles */
+        .history-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .gallery-info {
+            padding: 15px;
+        }
+
+        .gallery-prompt {
+            font-size: 0.9rem;
+            color: #333;
+            height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .gallery-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .gallery-actions .btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        /* Modal for Image Preview */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            margin: 5% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            color: white;
+            background: #dc3545;
+            font-size: 24px;
+            font-weight: bold;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .modal-body {
+            display: flex;
+            gap: 20px;
+        }
+
+        .modal-image-container {
+            flex: 2;
+            text-align: center;
+        }
+
+        .modal-image-container img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        .modal-details {
+            flex: 1;
+        }
+
+        .status-indicator {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-text_response {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .prompt-templates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .prompt-template {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .prompt-template:hover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .prompt-template h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        /* Model Indicator Badge Styles */
+        .model-indicator {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .model-indicator.gemini {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Purple gradient for Gemini */
+        }
+
+        .model-indicator.nano-banana {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%); /* Green gradient for Nano Banana */
+        }
+
+        .progress-bar-container {
+            width: 80%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            margin: 0 auto 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .nav-tab {
+                margin: 2px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-magic"></i> AI创意图片处理</h1>
+            <p>基于 Gemini 2.5 Flash Image Preview 的强大AI绘图能力</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('main')">
+                <i class="fas fa-palette"></i> 创意工坊
+            </button>
+            <button class="nav-tab" onclick="showTab('settings')">
+                <i class="fas fa-cog"></i> 设置
+            </button>
+            <button class="nav-tab" onclick="showTab('history')">
+                <i class="fas fa-history"></i> 历史记录
+            </button>
+
+            <button class="nav-tab" onclick="showTab('help')">
+                <i class="fas fa-question-circle"></i> 帮助
+            </button>
+        </div>
+
+        <!-- 主控制台 -->
+        <div id="main" class="tab-content active">
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+                    <h2><i class="fas fa-image"></i> AI创意图片处理工作台</h2>
+                    <span id="modelIndicator" class="model-indicator"></span>
+                </div>
+                
+                <!-- 功能模式选择 -->
+                <div class="form-group">
+                    <label>处理模式</label>
+                    <div class="nav-tabs" style="margin-bottom: 20px;">
+                        <button class="nav-tab active" onclick="switchMode('generate')">
+                            <i class="fas fa-magic"></i> 图片生成
+                        </button>
+                        <button class="nav-tab" onclick="switchMode('localEdit')">
+                            <i class="fas fa-crosshairs"></i> 局部编辑
+                        </button>
+                        <button class="nav-tab" onclick="switchMode('fusion')">
+                            <i class="fas fa-layer-group"></i> 图像融合
+                        </button>
+                        <button class="nav-tab" onclick="switchMode('textEdit')">
+                            <i class="fas fa-font"></i> 文本编辑
+                        </button>
+                        <button class="nav-tab" onclick="switchMode('consistency')">
+                            <i class="fas fa-sync-alt"></i> 一致性生成
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 图片生成模式 -->
+                <div id="generateMode" class="mode-content">
+                <div class="form-group">
+                    <label for="prompt">创意描述</label>
+                    <textarea id="prompt" class="form-control" rows="4" 
+                              placeholder="请详细描述您想要生成的图片内容，例如：一只可爱的小猫坐在花园里，阳光明媚，风格温馨..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>参考图片（可选）</label>
+                    <div class="image-upload-area" onclick="document.getElementById('referenceImage').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击上传参考图片</p>
+                        <p style="font-size: 0.9rem; color: #666;">支持 b64 和 URL 格式</p>
+                    </div>
+                    <input type="file" id="referenceImage" accept="image/*" style="display: none;" onchange="previewReferenceImage(this)">
+                    <img id="referencePreview" class="image-preview" style="display: none;">
+                </div>
+
+                </div>
+
+                <!-- 局部编辑模式 -->
+                <div id="localEditMode" class="mode-content" style="display: none;">
+                <div class="form-group">
+                        <label for="localEditPrompt">编辑指令</label>
+                        <textarea id="localEditPrompt" class="form-control" rows="2" 
+                                  placeholder="例如：移除这个人、给这件衬衫添加条纹、修复这个划痕..."></textarea>
+                        </div>
+                    <div class="form-group">
+                        <label>要编辑的图片</label>
+                        <div class="image-upload-area" onclick="document.getElementById('localEditImage').click()">
+                            <i class="fas fa-edit"></i>
+                            <p>上传要编辑的图片</p>
+                            <p style="font-size: 0.9rem; color: #666;">上传后点击图片选择编辑区域</p>
+                        </div>
+                        <input type="file" id="localEditImage" accept="image/*" style="display: none;" onchange="previewLocalEditImage(this)">
+                        <canvas id="localEditCanvas" style="display: none; max-width: 100%; border: 2px solid #667eea; border-radius: 10px; cursor: crosshair;"></canvas>
+                        </div>
+                        </div>
+
+                <!-- 图像融合模式 -->
+                <div id="fusionMode" class="mode-content" style="display: none;">
+                    <div class="form-group">
+                        <label for="fusionPrompt">融合指令</label>
+                        <textarea id="fusionPrompt" class="form-control" rows="2" 
+                                  placeholder="例如：将第二张图的风格应用到第一张图、将这个物体放入新场景、融合两张图的纹理..."></textarea>
+                    </div>
+                    <div class="settings-grid">
+                        <div>
+                            <label>主图像</label>
+                            <div class="image-upload-area" onclick="document.getElementById('fusionMainImage').click()">
+                                <i class="fas fa-image"></i>
+                                <p>上传主图像</p>
+                            </div>
+                            <input type="file" id="fusionMainImage" accept="image/*" style="display: none;" onchange="previewFusionImage(this, 'main')">
+                            <img id="fusionMainPreview" class="image-preview" style="display: none;">
+                        </div>
+                        <div>
+                            <label>融合图像</label>
+                            <div class="image-upload-area" onclick="document.getElementById('fusionSecondImage').click()">
+                                <i class="fas fa-images"></i>
+                                <p>上传要融合的图像</p>
+                            </div>
+                            <input type="file" id="fusionSecondImage" accept="image/*" style="display: none;" onchange="previewFusionImage(this, 'second')">
+                            <img id="fusionSecondPreview" class="image-preview" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文本编辑模式 -->
+                <div id="textEditMode" class="mode-content" style="display: none;">
+                    <div class="form-group">
+                        <label for="textEditPrompt">文本编辑指令</label>
+                        <textarea id="textEditPrompt" class="form-control" rows="2" 
+                                  placeholder="例如：将报纸标题改为'AI时代来临'、修改产品标签文字、更换店铺招牌..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>包含文字的图像</label>
+                        <div class="image-upload-area" onclick="document.getElementById('textEditImage').click()">
+                            <i class="fas fa-file-text"></i>
+                            <p>上传包含文字的图片</p>
+                        </div>
+                        <input type="file" id="textEditImage" accept="image/*" style="display: none;" onchange="previewTextEditImage(this)">
+                        <img id="textEditPreview" class="image-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- 一致性生成模式 -->
+                <div id="consistencyMode" class="mode-content" style="display: none;">
+                    <div class="form-group">
+                        <label for="consistencyPrompt">一致性生成指令</label>
+                        <textarea id="consistencyPrompt" class="form-control" rows="3" 
+                                  placeholder="例如：保持同样的角色，但改变背景为海滩、让这个角色做不同的动作、在新场景中保持相同的风格..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>参考角色/场景</label>
+                        <div class="image-upload-area" onclick="document.getElementById('consistencyRefImage').click()">
+                            <i class="fas fa-user-friends"></i>
+                            <p>上传参考角色或场景图片</p>
+                        </div>
+                        <input type="file" id="consistencyRefImage" accept="image/*" style="display: none;" onchange="previewConsistencyImage(this)">
+                        <img id="consistencyRefPreview" class="image-preview" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- 提示词模板 -->
+                <div class="form-group">
+                    <label>提示词模板</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="importTemplates()">
+                            <i class="fas fa-upload"></i> 导入模板
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportTemplates()">
+                            <i class="fas fa-download"></i> 导出模板
+                        </button>
+                        <button class="btn btn-secondary" onclick="addCustomTemplate()">
+                            <i class="fas fa-plus"></i> 添加模板
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetTemplates()">
+                            <i class="fas fa-undo"></i> 重置默认
+                        </button>
+                    </div>
+                    <div id="promptTemplates" class="prompt-templates">
+                        <!-- 模板将通过JavaScript动态生成 -->
+                    </div>
+                    <input type="file" id="templateImport" accept=".json" style="display: none;" onchange="handleTemplateImport(this)">
+                </div>
+
+                <!-- 执行按钮 -->
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="executeBtn" class="btn btn-primary" onclick="executeCurrentMode()">
+                    <i class="fas fa-magic"></i> 开始生成
+                </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-edit"></i> 处理结果</h2>
+                <div id="resultArea">
+                    <div style="text-align: center; color: #666; padding: 40px;">
+                        <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>选择处理模式并点击执行按钮开始创作</p>
+                    </div>
+                </div>
+            </div>
+
+                    <div id="loading" class="loading">
+            <div class="spinner"></div>
+                <p id="loadingStatusText" style="font-size: 1.1rem; margin-bottom: 20px;">AI正在连接服务器...</p>
+                <div class="progress-bar-container">
+                    <div id="progressBar" class="progress-bar"></div>
+                </div>
+                <div id="progressText" style="margin-top: 10px; color: #666; font-size: 0.9rem;"></div>
+        </div>
+        </div>
+
+        <!-- 设置页面 -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-cog"></i> API 配置</h2>
+                <div class="settings-grid">
+                    <div class="form-group">
+                        <label for="apiUrl">API 地址</label>
+                        <input type="text" id="apiUrl" class="form-control" 
+                               placeholder="https://api.example.com/v1/chat/completions" 
+                               value="https://api.example.com/v1/chat/completions">
+                    </div>
+                    <div class="form-group">
+                        <label for="apiKey">API Key</label>
+                        <input type="password" id="apiKey" class="form-control" 
+                               placeholder="请输入您的 API Key">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">
+                    <i class="fas fa-save"></i> 保存设置
+                </button>
+                <button class="btn btn-secondary" onclick="testApiConnection()" style="margin-left: 10px;">
+                    <i class="fas fa-plug"></i> 测试连接
+                </button>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-sliders-h"></i> 高级设置</h2>
+                <div class="form-group">
+                    <label for="modelName">模型名称</label>
+                    <select id="modelName" class="form-control">
+                        <option value="gemini-2.5-flash-image-preview">Gemini 2.5 Flash (Base64 Stream)</option>
+                        <option value="nano-banana">Nano Banana (Markdown URL)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>API状态</label>
+                    <div id="apiStatus" style="display: flex; align-items: center; gap: 10px;">
+                        <span id="statusIndicator" class="status-indicator status-processing">未测试</span>
+                        <button class="btn btn-secondary" onclick="testApiConnection()" style="padding: 8px 16px; font-size: 0.9rem;">
+                            <i class="fas fa-plug"></i> 测试连接
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="debugMode" style="margin-right: 8px;">
+                        启用调试模式（显示API响应内容）
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="maxTokens">最大Token数</label>
+                    <input type="number" id="maxTokens" class="form-control" value="1000" min="100" max="4000">
+                </div>
+                <div class="form-group">
+                    <label for="temperature">创意程度</label>
+                    <input type="range" id="temperature" class="form-control" min="0" max="2" step="0.1" value="0.7">
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+                        <span>保守</span>
+                        <span>平衡</span>
+                        <span>创意</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div id="history" class="tab-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2><i class="fas fa-images"></i> 创意相册</h2>
+                    <button class="btn btn-secondary" onclick="clearHistory()" style="background: #dc3545;">
+                        <i class="fas fa-trash-alt"></i> 清空相册
+                    </button>
+                </div>
+                <div id="historyGallery" class="history-gallery">
+                    <!-- 相册内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 帮助页面 -->
+        <div id="help" class="tab-content">
+            <div class="card">
+                <h2><i class="fas fa-question-circle"></i> 使用说明</h2>
+                <div class="form-group">
+                    <h3><i class="fas fa-rocket"></i> 模型介绍</h3>
+                    <p><strong>模型名称：</strong>gemini-2.5-flash-image-preview (Nano Banana)</p>
+                    <p><strong>介绍：</strong>由 Google 最先进的生成式 AI 模型驱动，具备强大的上下文理解、精确编辑和多图像处理能力。它不仅仅是一个图像生成器，更是一个能够深度理解您意图的创意伙伴。</p>
+                    <p><strong>核心优势：</strong>高级推理、角色与场景一致性、精确局部编辑、文本与细节处理、多图像融合。</p>
+                </div>
+                
+                <div class="form-group">
+                    <h3><i class="fas fa-book-open"></i> 使用指南</h3>
+                    <h4><i class="fas fa-palette"></i> 创意工坊</h4>
+                    <ol style="padding-left: 20px;">
+                        <li>在"设置"页面配置您的API地址和Key。</li>
+                        <li>在"创意工坊"中输入详细的图片描述，或选择一个提示词模板。</li>
+                        <li>(可选) 上传一张参考图片，帮助AI更好地理解您的想法。</li>
+                        <li>点击"开始生成"，等待AI完成创作。</li>
+                    </ol>
+                    <h4><i class="fas fa-magic"></i> 高级编辑</h4>
+                    <ol style="padding-left: 20px;">
+                        <li>切换到"高级编辑"选项卡。</li>
+                        <li>选择您需要的功能（如局部编辑、图像融合等）。</li>
+                        <li>上传所需的图片并输入相应的编辑指令。</li>
+                        <li>点击执行按钮，AI将根据您的指令进行精确操作。</li>
+                    </ol>
+                </div>
+
+                <div class="form-group">
+                    <h3><i class="fas fa-lightbulb"></i> 功能详解</h3>
+                    <ul style="padding-left: 20px;">
+                        <li><strong>提示词模板管理：</strong>在"创意工坊"中，您可以导入、导出、添加、删除和重置提示词模板，打造个性化的创意库。</li>
+                        <li><strong>局部精确编辑：</strong>在"高级编辑"中，上传图片后，点击图中任意位置，然后用自然语言描述修改内容，实现“指哪改哪”。</li>
+                        <li><strong>多图像融合：</strong>将两张图片（如一张人物照和一张风景照）融合，或将一张图的风格应用到另一张图上。</li>
+                        <li><strong>图像文本编辑：</strong>轻松修改图片中的文字，如更改路牌、标签或标题，同时保持原有风格。</li>
+                        <li><strong>角色场景一致性：</strong>在生成系列图片或故事时，使用此功能可以确保主角的外观和场景的风格保持高度一致。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert" class="alert"></div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody" class="modal-body">
+                <!-- Modal content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody" class="modal-body">
+                <!-- Modal content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 AI创意图片处理. 基于 Gemini 2.5 Flash Image Preview</p>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentTab = 'main';
+        let historyData = [];
+        let promptTemplates = {}; // Changed to an object to hold categorized templates
+        let selectedEditPoint = null;
+        let currentMode = 'generate';
+
+        // 显示标签页
+        function showTab(tabName) {
+            // 隐藏所有标签页内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有标签页的active状态
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签页
+            document.getElementById(tabName).classList.add('active');
+            
+            // 激活对应的导航按钮
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            // 如果是历史记录标签页，加载历史数据
+            if (tabName === 'history') {
+                loadHistory();
+            }
+        }
+
+        // 预览参考图片
+        function previewReferenceImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('referencePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 使用提示词模板
+        function useTemplate(template, mode) {
+            const promptMap = {
+                generate: 'prompt',
+                localEdit: 'localEditPrompt',
+                fusion: 'fusionPrompt',
+                textEdit: 'textEditPrompt',
+                consistency: 'consistencyPrompt'
+            };
+            const textareaId = promptMap[mode];
+            if (textareaId) {
+                document.getElementById(textareaId).value = template;
+            }
+        }
+
+        // 提示词模板管理功能
+        function loadPromptTemplates() {
+            const savedTemplates = localStorage.getItem('promptTemplates');
+            if (savedTemplates) {
+                promptTemplates = JSON.parse(savedTemplates);
+            } else {
+                // Default categorized templates
+                promptTemplates = {
+                    generate: [
+                        {
+                            id: 1,
+                            title: "平面图转立体手办",
+                            icon: "fas fa-cube",
+                            description: "将2D图片转为3D手办场景",
+                            prompt: "Turn this photo into a character figure. Behind it, place a box with the character's image printed on it, and a computer showing the blender modeling process on its screen. In front of the box, add a round plastic base with the character figure standing on it. Set the scene indoors if possible."
+                        },
+                        {
+                            id: 4,
+                            title: "黑白照片上色",
+                            icon: "fas fa-palette",
+                            description: "为黑白照片添加自然色彩",
+                            prompt: "turn this black and white image into a colorful image"
+                        },
+                        {
+                            id: 5,
+                            title: "AI摄影棚",
+                            icon: "fas fa-camera-retro",
+                            description: "调整人物姿势和场景光照",
+                            prompt: "Let the woman sit on the chair; match the proper lighting."
+                        },
+                        {
+                            id: 8,
+                            title: "换风格",
+                            icon: "fas fa-random",
+                            description: "转换图片艺术风格",
+                            prompt: "Reverse this image from its current creepy art style to something much more luxurious. let it look like a luxury advertisement for a fashionable magazine. Adjust the lighting as well, but basic composition should remain intact."
+                        }
+                    ],
+                    localEdit: [
+                        {
+                            id: 3,
+                            title: "理解3D空间",
+                            icon: "fas fa-vector-square",
+                            description: "在轮廓内绘制3D线框网格",
+                            prompt: "Draw a cyan surface wireframe (grid-like) mesh inside the silhouette that shows the 3D shape of what you see from the figure."
+                        },
+                        {
+                            id: 6,
+                            title: "电商产品图(替换)",
+                            icon: "fas fa-shopping-cart",
+                            description: "替换图中产品、背景或道具",
+                            prompt: "Change the Coca-Cola in the woman's hand into Pepsi."
+                        }
+                    ],
+                    fusion: [
+                         {
+                            id: 2,
+                            title: "和偶像合影",
+                            icon: "fas fa-user-friends",
+                            description: "将两人融合到时尚背景中",
+                            prompt: "Put the two people into an image. and set a fashionable, cool background."
+                        },
+                        {
+                            id: 7,
+                            title: "换背景",
+                            icon: "fas fa-image",
+                            description: "将人物置于新背景中",
+                            prompt: "let this women stand in the first image."
+                        }
+                    ],
+                    textEdit: [
+                        {
+                            id: 9,
+                            title: "封面设计",
+                            icon: "fas fa-youtube",
+                            description: "为图片添加文字制作封面",
+                            prompt: "Make me a youtube thumbnail of this woman in smart glasses and add the text \"big news\""
+                        }
+                    ],
+                    consistency: [
+                        {
+                            id: 10,
+                            title: "Logo延展设计",
+                            icon: "fas fa-copyright",
+                            description: "将Logo应用到不同物体上",
+                            prompt: "put this logo on the hat of the second image. put this logo on the bag of the second image.the text of logo change to white"
+                        }
+                    ]
+                };
+                savePromptTemplates();
+            }
+            renderPromptTemplates(currentMode);
+        }
+
+        function renderPromptTemplates(mode) {
+            const container = document.getElementById('promptTemplates');
+            const templatesForMode = promptTemplates[mode] || [];
+
+            if (templatesForMode.length === 0) {
+                container.innerHTML = `<p style="color: #666; text-align: center;">此模式下没有可用的模板。</p>`;
+                return;
+            }
+
+            container.innerHTML = templatesForMode.map(template => `
+                <div class="prompt-template" onclick="useTemplate('${template.prompt.replace(/'/g, "\\'")}', '${mode}')">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <h4><i class="${template.icon}"></i> ${template.title}</h4>
+                            <p>${template.description}</p>
+                        </div>
+                        <button class="btn btn-secondary" onclick="event.stopPropagation(); deleteTemplate(${template.id}, '${mode}')" 
+                                style="padding: 4px 8px; font-size: 0.8rem; margin-left: 10px;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function savePromptTemplates() {
+            localStorage.setItem('promptTemplates', JSON.stringify(promptTemplates));
+        }
+
+        function importTemplates() {
+            document.getElementById('templateImport').click();
+        }
+
+        function handleTemplateImport(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (typeof importedData === 'object' && !Array.isArray(importedData)) {
+                            let importCount = 0;
+                            for (const mode in importedData) {
+                                if (importedData.hasOwnProperty(mode) && Array.isArray(importedData[mode])) {
+                                    if (!promptTemplates[mode]) {
+                                        promptTemplates[mode] = [];
+                                    }
+                                    const existingIds = new Set(promptTemplates[mode].map(t => t.id));
+                                    importedData[mode].forEach(template => {
+                                        if (!existingIds.has(template.id)) {
+                                            promptTemplates[mode].push(template);
+                                            importCount++;
+                                        }
+                                    });
+                                }
+                            }
+                            savePromptTemplates();
+                            renderPromptTemplates(currentMode);
+                            showAlert(`成功导入 ${importCount} 个模板`, 'success');
+                        } else {
+                            throw new Error('无效的模板文件格式，需要分类的对象格式。');
+                        }
+                    } catch (error) {
+                        showAlert('导入失败：' + error.message, 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function exportTemplates() {
+            const dataStr = JSON.stringify(promptTemplates, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `prompt-templates-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showAlert('模板导出成功', 'success');
+        }
+
+        function addCustomTemplate() {
+            const title = prompt('请输入模板标题：');
+            if (!title) return;
+            
+            const description = prompt('请输入模板描述：');
+            if (!description) return;
+            
+            const promptText = prompt('请输入提示词内容：');
+            if (!promptText) return;
+            
+            const icon = prompt('请输入图标类名（可选，默认为 fas fa-star）：') || 'fas fa-star';
+            
+            if (!promptTemplates[currentMode]) {
+                promptTemplates[currentMode] = [];
+            }
+
+            const allIds = Object.values(promptTemplates).flat().map(t => t.id);
+            const newId = Math.max(0, ...allIds) + 1;
+
+            const newTemplate = {
+                id: newId,
+                title: title,
+                icon: icon,
+                description: description,
+                prompt: promptText
+            };
+            
+            promptTemplates[currentMode].push(newTemplate);
+            savePromptTemplates();
+            renderPromptTemplates(currentMode);
+            showAlert('模板添加成功', 'success');
+        }
+
+        function deleteTemplate(id, mode) {
+            if (confirm('确定要删除这个模板吗？')) {
+                if (promptTemplates[mode]) {
+                    promptTemplates[mode] = promptTemplates[mode].filter(t => t.id !== id);
+                    savePromptTemplates();
+                    renderPromptTemplates(mode);
+                    showAlert('模板删除成功', 'success');
+                }
+            }
+        }
+
+        function resetTemplates() {
+            if (confirm('确定要重置为默认模板吗？这将删除所有自定义模板。')) {
+                localStorage.removeItem('promptTemplates');
+                loadPromptTemplates();
+                showAlert('模板已重置为默认', 'success');
+            }
+        }
+
+        // 高级编辑功能
+        function previewLocalEditImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const canvas = document.getElementById('localEditCanvas');
+                    const ctx = canvas.getContext('2d');
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        canvas.width = Math.min(img.width, 800);
+                        canvas.height = Math.min(img.height, 600);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.style.display = 'block';
+                        
+                        // 添加点击事件
+                        canvas.onclick = function(e) {
+                            const rect = canvas.getBoundingClientRect();
+                            const x = e.clientX - rect.left;
+                            const y = e.clientY - rect.top;
+                            
+                            // 清除之前的选择点
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            // 绘制选择点
+                            ctx.fillStyle = '#ff0000';
+                            ctx.beginPath();
+                            ctx.arc(x, y, 8, 0, 2 * Math.PI);
+                            ctx.fill();
+                            
+                            // 绘制十字线
+                            ctx.strokeStyle = '#ff0000';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(x - 15, y);
+                            ctx.lineTo(x + 15, y);
+                            ctx.moveTo(x, y - 15);
+                            ctx.lineTo(x, y + 15);
+                            ctx.stroke();
+                            
+                            selectedEditPoint = { x: x, y: y };
+                            showAlert('已选择编辑点：(' + Math.round(x) + ', ' + Math.round(y) + ')', 'success');
+                        };
+                    };
+                    
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewFusionImage(input, type) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById(`fusion${type === 'main' ? 'Main' : 'Second'}Preview`);
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewTextEditImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('textEditPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function previewConsistencyImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('consistencyRefPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function performLocalEdit() {
+            const prompt = document.getElementById('localEditPrompt').value.trim();
+            const imageFile = document.getElementById('localEditImage').files[0];
+            
+            if (!prompt) {
+                showAlert('请输入编辑指令', 'error');
+                return;
+            }
+            
+            if (!imageFile) {
+                showAlert('请上传要编辑的图片', 'error');
+                return;
+            }
+            
+            if (!selectedEditPoint) {
+                showAlert('请在图片上点击选择编辑区域', 'error');
+                return;
+            }
+            
+            const base64Image = await convertImageToBase64(imageFile);
+            const editPrompt = `请对图像坐标(${selectedEditPoint.x}, ${selectedEditPoint.y})附近的区域进行以下编辑：${prompt}。请保持图像其他部分完全不变，只修改指定区域。`;
+            
+            await performAdvancedEdit(editPrompt, base64Image, '局部编辑');
+        }
+
+        async function performImageFusion() {
+            const prompt = document.getElementById('fusionPrompt').value.trim();
+            const mainImage = document.getElementById('fusionMainImage').files[0];
+            const secondImage = document.getElementById('fusionSecondImage').files[0];
+            
+            if (!prompt) {
+                showAlert('请输入融合指令', 'error');
+                return;
+            }
+            
+            if (!mainImage || !secondImage) {
+                showAlert('请上传两张要融合的图片', 'error');
+                return;
+            }
+            
+            const base64Main = await convertImageToBase64(mainImage);
+            const base64Second = await convertImageToBase64(secondImage);
+            
+            const fusionPrompt = `请将以下两张图片进行融合：${prompt}。第一张图片作为主图，第二张图片用于融合。`;
+            
+            await performAdvancedEdit(fusionPrompt, [base64Main, base64Second], '图像融合');
+        }
+
+        async function performTextEdit() {
+            const prompt = document.getElementById('textEditPrompt').value.trim();
+            const imageFile = document.getElementById('textEditImage').files[0];
+            
+            if (!prompt) {
+                showAlert('请输入文本编辑指令', 'error');
+                return;
+            }
+            
+            if (!imageFile) {
+                showAlert('请上传包含文字的图片', 'error');
+                return;
+            }
+            
+            const base64Image = await convertImageToBase64(imageFile);
+            const textPrompt = `请识别并修改图像中的文字：${prompt}。保持原始字体风格和排版，只修改文字内容。`;
+            
+            await performAdvancedEdit(textPrompt, base64Image, '文本编辑');
+        }
+
+        async function performConsistencyGeneration() {
+            const prompt = document.getElementById('consistencyPrompt').value.trim();
+            const refImage = document.getElementById('consistencyRefImage').files[0];
+            
+            if (!prompt) {
+                showAlert('请输入一致性生成指令', 'error');
+                return;
+            }
+            
+            if (!refImage) {
+                showAlert('请上传参考角色或场景图片', 'error');
+                return;
+            }
+            
+            const base64Image = await convertImageToBase64(refImage);
+            const consistencyPrompt = `基于参考图像中的角色/场景，${prompt}。请严格保持角色外观、风格和特征的一致性。`;
+            
+            await performAdvancedEdit(consistencyPrompt, base64Image, '一致性生成');
+        }
+
+        let loadingInterval;
+
+        function startLoadingIndicator(processName) {
+            const loadingStatusText = document.getElementById('loadingStatusText');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+
+            // Reset state
+            progressBar.style.transition = 'width 0.5s ease-in-out';
+            progressBar.style.width = '0%';
+            progressText.textContent = '正在初始化...';
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultArea').style.display = 'none';
+
+            const messages = [
+                `正在连接AI大脑以开始${processName}...`,
+                "AI正在分析您的需求...",
+                "正在生成创意草图...",
+                "AI正在挥洒创意...",
+                "正在进行细节渲染...",
+                "即将完成，请稍候..."
+            ];
+
+            let messageIndex = 0;
+            let progress = 0;
+
+            loadingStatusText.textContent = messages[messageIndex];
+
+            loadingInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % messages.length;
+                loadingStatusText.textContent = messages[messageIndex];
+
+                if (progress < 90) {
+                    progress += Math.random() * 10;
+                    if (progress > 90) progress = 90;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 2000);
+        }
+
+        function updateLoadingProgress(text) {
+            const progressText = document.getElementById('progressText');
+            progressText.textContent = text;
+        }
+
+        function stopLoadingIndicator() {
+            clearInterval(loadingInterval);
+            const progressBar = document.getElementById('progressBar');
+            const loadingStatusText = document.getElementById('loadingStatusText');
+            
+            progressBar.style.transition = 'width 0.3s ease';
+            progressBar.style.width = '100%';
+            loadingStatusText.textContent = '创作完成！';
+
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultArea').style.display = 'block';
+            }, 500);
+        }
+
+        async function performAdvancedEdit(prompt, imageData, editType) {
+            const settings = getSettings();
+            if (!settings.apiUrl || !settings.apiKey) {
+                showAlert('请先在设置页面配置API信息', 'error');
+                return;
+            }
+
+            startLoadingIndicator(editType);
+
+            try {
+                let requestData;
+                
+                if (Array.isArray(imageData)) {
+                    // 多图像融合
+                    requestData = {
+                        model: settings.modelName,
+                        messages: [
+                            {
+                                role: "user",
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: prompt
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: `data:image/jpeg;base64,${imageData[0]}`
+                                        }
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: `data:image/jpeg;base64,${imageData[1]}`
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens: parseInt(settings.maxTokens),
+                        temperature: parseFloat(settings.temperature),
+                        stream: true
+                    };
+                } else {
+                    // 单图像编辑
+                    requestData = {
+                        model: "gemini-2.5-flash-image-preview",
+                        messages: [
+                            {
+                                role: "user",
+                                content: [
+                                    {
+                                        type: "text",
+                                        text: prompt
+                                    },
+                                    {
+                                        type: "image_url",
+                                        image_url: {
+                                            url: `data:image/jpeg;base64,${imageData}`
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        max_tokens: parseInt(settings.maxTokens),
+                        temperature: parseFloat(settings.temperature),
+                        stream: true
+                    };
+                }
+
+                const response = await fetch(settings.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${settings.apiKey}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = '';
+                let chunkCount = 0;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    fullResponse += chunk;
+                    updateLoadingProgress(`已接收 ${++chunkCount} 个数据块...`);
+                }
+
+                updateLoadingProgress('正在解析结果...');
+                const finalResult = extractImageData(fullResponse);
+                
+                if (finalResult.imageData) {
+                    showGenerationResult(`${editType}: ${prompt}`, finalResult.imageData, finalResult.downloadUrl);
+                    await saveToHistory(`${editType}: ${prompt}`, finalResult.imageData);
+                } else if (finalResult.text) {
+                    showTextResult(`${editType}: ${prompt}`, finalResult.text);
+                    await saveToHistory(`${editType}: ${prompt}`, null, true);
+                } else {
+                    throw new Error(`${editType}失败：未能提取到结果`);
+                }
+
+            } catch (error) {
+                console.error(`${editType}失败:`, error);
+                showAlert(`${editType}失败: ${error.message}`, 'error');
+                showGenerationError(`${editType}: ${prompt}`, error.message);
+            } finally {
+                stopLoadingIndicator();
+            }
+        }
+
+        // 切换处理模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // 隐藏所有模式内容
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // 显示当前模式内容
+            document.getElementById(`${mode}Mode`).style.display = 'block';
+            
+            // 更新导航标签的激活状态
+            const modeTabs = document.querySelectorAll('#main .nav-tab');
+            modeTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 渲染对应模式的提示词模板
+            renderPromptTemplates(mode);
+
+            // 更新执行按钮的文本
+            const executeBtn = document.getElementById('executeBtn');
+            const btnTextMap = {
+                generate: '开始生成',
+                localEdit: '执行局部编辑',
+                fusion: '执行图像融合',
+                textEdit: '执行文本编辑',
+                consistency: '生成一致性图像'
+            };
+            executeBtn.innerHTML = `<i class="fas fa-magic"></i> ${btnTextMap[mode]}`;
+        }
+
+        // 执行当前模式的操作
+        function executeCurrentMode() {
+            switch (currentMode) {
+                case 'generate':
+                    generateImage();
+                    break;
+                case 'localEdit':
+                    performLocalEdit();
+                    break;
+                case 'fusion':
+                    performImageFusion();
+                    break;
+                case 'textEdit':
+                    performTextEdit();
+                    break;
+                case 'consistency':
+                    performConsistencyGeneration();
+                    break;
+            }
+        }
+
+        // 生成图片
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if (!prompt) {
+                showAlert('请输入创意描述', 'error');
+                return;
+            }
+
+            // 检查API配置
+            const settings = getSettings();
+            if (!settings.apiUrl || !settings.apiKey) {
+                showAlert('请先在设置页面配置API信息', 'error');
+                return;
+            }
+
+            startLoadingIndicator('图片生成');
+
+            try {
+                // 获取参考图片
+                const referenceImage = document.getElementById('referenceImage').files[0];
+                let base64Image = null;
+                
+                if (referenceImage) {
+                    base64Image = await convertImageToBase64(referenceImage);
+                }
+
+                // 构建API请求
+                const requestData = buildApiRequest(prompt, base64Image, settings);
+                
+                // 发起API请求
+                const response = await fetch(settings.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${settings.apiKey}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API请求失败: ${response.status} ${response.statusText}`);
+                }
+
+                // 处理流式响应
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResponse = ''; // 累积完整响应
+                let result = '';
+                let imageData = null;
+                let chunkCount = 0;
+
+                // 更新进度显示
+                const progressText = document.getElementById('progressText');
+                progressText.textContent = '正在接收AI响应...';
+
+                while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        fullResponse += chunk; // 累积完整响应
+                        
+                        // 显示进度
+                        progressText.textContent = `接收进度: ${chunkCount++} chunks`;
+                }
+
+                // 处理完整的响应数据
+                const finalResult = extractImageData(fullResponse);
+                result = finalResult.text;
+                imageData = finalResult.imageData;
+                const downloadUrl = finalResult.downloadUrl;
+
+                progressText.textContent = '正在处理生成结果...';
+
+                // 调试输出
+                console.log('完整API响应:', fullResponse);
+                console.log('提取的文字内容:', result);
+                console.log('提取的图片数据:', imageData);
+                console.log('提取的下载链接:', downloadUrl);
+                
+                // 检查是否成功提取到数据
+                if (imageData) {
+                    // 验证图片数据的有效性
+                    if (imageData.startsWith('data:image/') || imageData.startsWith('http')) {
+                        console.log('成功提取到有效的图片数据');
+                        showGenerationResult(prompt, imageData, downloadUrl);
+                        await saveToHistory(prompt, imageData);
+                    } else {
+                        console.warn('提取到的图片数据格式无效:', imageData.substring(0, 100));
+                        throw new Error('提取到的图片数据格式无效');
+                    }
+                } else if (result && result.trim() !== '') {
+                    // 如果没有图片数据但有文本结果
+                    console.log('API返回文本响应，未生成图片');
+                    showTextResult(prompt, fullResponse); // Show the full response for debugging
+                    await saveToHistory(prompt, null, true);
+                } else {
+                    // 完全没有提取到任何有用数据
+                    console.error('未能从API响应中提取任何数据');
+                    console.error('原始响应长度:', fullResponse.length);
+                    throw new Error('未能从API响应中提取任何数据\n\n请检查API配置或稍后重试。');
+                }
+
+            } catch (error) {
+                console.error('生成图片时出错:', error);
+                
+                // 根据错误类型提供不同的错误信息
+                let errorMessage = error.message;
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = '网络连接失败，请检查网络设置';
+                } else if (error.message.includes('401')) {
+                    errorMessage = 'API Key无效，请检查设置';
+                } else if (error.message.includes('403')) {
+                    errorMessage = 'API访问被拒绝，请检查权限';
+                } else if (error.message.includes('429')) {
+                    errorMessage = '请求过于频繁，请稍后重试';
+                } else if (error.message.includes('500')) {
+                    errorMessage = '服务器内部错误，请稍后重试';
+                }
+                
+                showAlert(`生成失败: ${errorMessage}`, 'error');
+                showGenerationError(prompt, errorMessage);
+            } finally {
+                stopLoadingIndicator();
+            }
+        }
+
+        // 构建API请求数据
+        function buildApiRequest(prompt, base64Image, settings) {
+            const messages = [];
+            
+            // 如果有参考图片，添加到消息中
+            if (base64Image) {
+                messages.push({
+                    role: "user",
+                    content: [
+                        {
+                            type: "text",
+                            text: prompt
+                        },
+                        {
+                            type: "image_url",
+                            image_url: {
+                                url: `data:image/jpeg;base64,${base64Image}`
+                            }
+                        }
+                    ]
+                });
+            } else {
+                messages.push({
+                    role: "user",
+                    content: prompt
+                });
+            }
+
+            return {
+                model: settings.modelName,
+                messages: messages,
+                max_tokens: parseInt(settings.maxTokens),
+                temperature: parseFloat(settings.temperature),
+                stream: true
+            };
+        }
+
+        // 将图片转换为Base64
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = reader.result.split(',')[1]; // 移除data:image/...;base64,前缀
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function extractImageData(response) {
+            const result = { text: '', imageData: null, downloadUrl: null };
+
+    try {
+        const lines = response.split('\n');
+        let accumulatedContent = '';
+
+        for (const line of lines) {
+            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                const jsonStr = line.substring(5).trim();
+                if (jsonStr === '') continue;
+
+                try {
+                    const data = JSON.parse(jsonStr);
+                    if (data.choices?.[0]?.delta?.content) {
+                                accumulatedContent += data.choices[0].delta.content;
+                    }
+                } catch (jsonError) {
+                            // Ignore JSON parse errors for incomplete chunks
+                }
+            }
+        }
+
+        result.text = accumulatedContent;
+        
+                if (accumulatedContent) {
+                    // 1. Check for Nano Banana's Markdown URL format (e.g., ![...](http...))
+                    const markdownUrlMatch = accumulatedContent.match(/!\[.*\]\((https?:\/\/[^)]+)\)/);
+                    if (markdownUrlMatch && markdownUrlMatch[1]) {
+                        result.imageData = markdownUrlMatch[1]; // The image URL for display
+                        console.log('Found image URL in Markdown:', result.imageData);
+                        
+                        // Also try to find the separate download link (e.g., [下载1](...))
+                        const downloadUrlMatch = accumulatedContent.match(/\[下载1\]\((https?:\/\/[^)]+)\)/);
+                        if (downloadUrlMatch && downloadUrlMatch[1]) {
+                            result.downloadUrl = downloadUrlMatch[1];
+                            console.log('Found download URL:', result.downloadUrl);
+                        }
+                        return result;
+                    }
+
+                    // 2. Fallback to check for Gemini's Base64 format (e.g., ![image](data:...))
+                    const base64Match = accumulatedContent.match(/!\[image\]\((data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)\)/) || accumulatedContent.match(/(data:image\/[^;]+;base64,[A-Za-z0-9+/=]+)/);
+                    if (base64Match && base64Match[1]) {
+                        result.imageData = base64Match[1];
+                        console.log('Found Base64 image data.');
+                        return result;
+                    }
+                }
+    } catch (error) {
+        console.error('Error processing streaming response:', error);
+    }
+
+    return result;
+}
+
+        // 生成占位图片（当API只返回文本时）
+        function generatePlaceholderImage(text) {
+            // 创建一个简单的占位图片，包含文本内容
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 512;
+            canvas.height = 512;
+            
+            // 设置背景
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 设置边框
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+            
+            // 设置文字样式
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 24px Arial, sans-serif';
+            ctx.textAlign = 'center';
+            
+            // 绘制标题
+            ctx.fillText('AI 生成结果', canvas.width / 2, 80);
+            
+            // 绘制文本内容（分行显示）
+            ctx.font = '18px Arial, sans-serif';
+            const words = text.split('，');
+            let y = 140;
+            
+            for (let i = 0; i < words.length && y < canvas.height - 60; i++) {
+                const line = words[i];
+                if (line.trim()) {
+                    ctx.fillText(line, canvas.width / 2, y);
+                    y += 40;
+                }
+            }
+            
+            // 绘制提示信息
+            ctx.fillStyle = '#667eea';
+            ctx.font = '16px Arial, sans-serif';
+            ctx.fillText('API返回了文本描述，未生成图片', canvas.width / 2, canvas.height - 40);
+            
+            return canvas.toDataURL('image/png');
+        }
+
+        // 显示生成结果
+        function showGenerationResult(prompt, imageData) {
+            const settings = getSettings();
+            const resultArea = document.getElementById('resultArea');
+            
+            let debugInfo = '';
+            if (settings.debugMode) {
+                debugInfo = `
+                    <div style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #667eea;">
+                        <h4><i class="fas fa-bug"></i> 调试信息</h4>
+                        <p><strong>图片数据类型:</strong> ${imageData.startsWith('data:image/') ? 'Base64' : 'URL'}</p>
+                        <p><strong>图片大小:</strong> ${imageData.startsWith('data:image/') ? Math.round(imageData.length * 0.75 / 1024) + ' KB' : '未知'}</p>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #667eea;">查看完整图片数据</summary>
+                            <textarea style="width: 100%; height: 100px; margin-top: 10px; font-family: monospace; font-size: 12px;" readonly>${imageData.substring(0, 500)}${imageData.length > 500 ? '...' : ''}</textarea>
+                        </details>
+                    </div>
+                `;
+            }
+            
+            resultArea.innerHTML = `
+                <div style="text-align: center;">
+                    <img src="${imageData}" alt="AI生成图片" class="image-preview" onerror="this.src='https://via.placeholder.com/512x512/667eea/ffffff?text=图片加载失败'">
+                    <div style="margin-top: 20px;">
+                        <h3>生成完成！</h3>
+                        <p>基于您的描述："${prompt}"</p>
+                        <button class="btn btn-secondary" onclick="downloadImage('${imageData}')">
+                            <i class="fas fa-download"></i> 下载图片
+                        </button>
+                        <button class="btn btn-primary" onclick="saveToHistory()">
+                            <i class="fas fa-save"></i> 保存到历史
+                        </button>
+                    </div>
+                    ${debugInfo}
+                </div>
+            `;
+        }
+
+        // 显示文本结果（当API只返回文本时）
+        function showTextResult(prompt, apiResponse) {
+            const settings = getSettings();
+            const resultArea = document.getElementById('resultArea');
+            
+            // 提取纯文本内容
+            const textContent = extractTextContent(apiResponse);
+            
+            let debugInfo = '';
+            if (settings.debugMode) {
+                debugInfo = `
+                    <div style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #ffc107;">
+                        <h4><i class="fas fa-info-circle"></i> 调试信息</h4>
+                        <p><strong>响应类型:</strong> 纯文本响应</p>
+                        <p><strong>文本长度:</strong> ${textContent.length} 字符</p>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #ffc107;">查看完整API响应</summary>
+                            <textarea style="width: 100%; height: 200px; margin-top: 10px; font-family: monospace; font-size: 12px;" readonly>${apiResponse}</textarea>
+                        </details>
+                    </div>
+                `;
+            }
+            
+            resultArea.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 15px; padding: 30px; margin-bottom: 20px;">
+                        <i class="fas fa-info-circle" style="font-size: 3rem; color: #ffc107; margin-bottom: 15px;"></i>
+                        <h3 style="color: #856404;">API返回文本响应</h3>
+                        <p style="color: #856404; margin: 20px 0;">基于您的描述："${prompt}"</p>
+                        <div style="background: white; border-radius: 10px; padding: 20px; margin: 20px 0; text-align: left;">
+                            <h4 style="color: #333; margin-bottom: 15px;">AI 回复内容：</h4>
+                            <p style="color: #333; font-size: 16px; line-height: 1.6;">${textContent}</p>
+                        </div>
+                        <p style="color: #856404; font-size: 14px;">注意：API返回了文本描述而不是图片，这可能是因为模型配置或当前官方请求过多等不可抗因素的原因。</p>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="generateImage()">
+                            <i class="fas fa-redo"></i> 重新尝试生成图片
+                        </button>
+                        <button class="btn btn-secondary" onclick="showTab('settings')" style="margin-left: 10px;">
+                            <i class="fas fa-cog"></i> 调整设置
+                        </button>
+                    </div>
+                    ${debugInfo}
+                </div>
+            `;
+        }
+
+        // 从API响应中提取纯文本内容
+        function extractTextContent(apiResponse) {
+            try {
+                const lines = apiResponse.split('\n');
+                let textContent = '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            if (data.choices && data.choices.length > 0) {
+                                const delta = data.choices[0].delta || {};
+                                const content = delta.content || '';
+                                if (content) {
+                                    textContent += content;
+                                }
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+
+                return textContent.trim() || '无文本内容';
+            } catch (error) {
+                console.error('提取文本内容时出错:', error);
+                return '无法解析文本内容';
+            }
+        }
+
+        // 显示生成错误
+        function showGenerationError(prompt, errorMessage = '') {
+            const settings = getSettings();
+            const resultArea = document.getElementById('resultArea');
+            
+            let debugInfo = '';
+            if (settings.debugMode) {
+                debugInfo = `
+                    <div style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid #dc3545;">
+                        <h4><i class="fas fa-bug"></i> 调试信息</h4>
+                        <p><strong>错误类型:</strong> ${errorMessage.includes('401') ? '认证失败' : errorMessage.includes('403') ? '权限不足' : errorMessage.includes('429') ? '请求过频' : errorMessage.includes('500') ? '服务器错误' : '其他错误'}</p>
+                        <p><strong>建议操作:</strong> ${errorMessage.includes('401') ? '检查API Key' : errorMessage.includes('403') ? '检查API权限' : errorMessage.includes('429') ? '稍后重试' : errorMessage.includes('500') ? '稍后重试' : '检查网络连接'}</p>
+                        <details style="margin-top: 10px;">
+                            <summary style="cursor: pointer; color: #dc3545;">查看详细错误信息</summary>
+                            <textarea style="width: 100%; height: 100px; margin-top: 10px; font-family: monospace; font-size: 12px;" readonly>${errorMessage}</textarea>
+                        </details>
+                    </div>
+                `;
+            }
+            
+            resultArea.innerHTML = `
+                <div style="text-align: center; color: #721c24; padding: 40px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <h3>生成失败</h3>
+                    <p>基于您的描述："${prompt}"</p>
+                    ${errorMessage ? `<p style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 5px;">${errorMessage}</p>` : ''}
+                    <p>请检查API配置或稍后重试</p>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="generateImage()">
+                            <i class="fas fa-redo"></i> 重新生成
+                        </button>
+                        <button class="btn btn-secondary" onclick="showTab('settings')" style="margin-left: 10px;">
+                            <i class="fas fa-cog"></i> 检查设置
+                        </button>
+                    </div>
+                    ${debugInfo}
+                </div>
+            `;
+        }
+
+        // 获取设置
+        function getSettings() {
+            const savedSettings = localStorage.getItem('aiImageSettings');
+            if (savedSettings) {
+                return JSON.parse(savedSettings);
+            }
+            return {
+                apiUrl: '',
+                apiKey: '',
+                maxTokens: 1000,
+                temperature: 0.7,
+                debugMode: false
+            };
+        }
+
+        // 测试API连接
+        async function testApiConnection() {
+            const settings = getSettings();
+            if (!settings.apiUrl || !settings.apiKey) {
+                showAlert('请先配置API地址和Key', 'error');
+                return;
+            }
+
+            // 更新状态指示器
+            const statusIndicator = document.getElementById('statusIndicator');
+            statusIndicator.textContent = '测试中...';
+            statusIndicator.className = 'status-indicator status-processing';
+
+            try {
+                showAlert('正在测试API连接...', 'success');
+                
+                // 发送一个简单的测试请求
+                const testRequest = {
+                    model: "gemini-2.5-flash-image-preview",
+                    messages: [
+                        {
+                            role: "user",
+                            content: "Hello, this is a test message."
+                        }
+                    ],
+                    max_tokens: 10,
+                    temperature: 0.7,
+                    stream: false
+                };
+
+                const response = await fetch(settings.apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${settings.apiKey}`
+                    },
+                    body: JSON.stringify(testRequest)
+                });
+
+                if (response.ok) {
+                    showAlert('API连接成功！', 'success');
+                    statusIndicator.textContent = '连接正常';
+                    statusIndicator.className = 'status-indicator status-success';
+                } else {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('API连接测试失败:', error);
+                showAlert(`API连接失败: ${error.message}`, 'error');
+                statusIndicator.textContent = '连接失败';
+                statusIndicator.className = 'status-indicator status-error';
+            }
+        }
+
+        // 生成缩略图以节省存储空间
+        function generateThumbnail(base64Image, maxWidth = 200, maxHeight = 200) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // 获取较低质量的JPEG数据URL
+                    resolve(canvas.toDataURL('image/jpeg', 0.8)); 
+                };
+                img.onerror = reject;
+                img.src = base64Image;
+            });
+        }
+
+        // 下载图片
+        async function downloadImage(imageData) {
+            try {
+                if (!imageData) {
+                    showAlert('没有可下载的图片', 'error');
+                    return;
+                }
+
+                // 如果是base64图片，直接下载
+                if (imageData.startsWith('data:image/')) {
+                    // 从data URL中提取图片类型和base64数据
+                    const match = imageData.match(/data:image\/([^;]+);base64,(.+)/);
+                    if (match) {
+                        const imageType = match[1];
+                        const base64Data = match[2];
+                        
+                        // 将base64转换为blob
+                        const byteCharacters = atob(base64Data);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], { type: `image/${imageType}` });
+                        
+                        // 创建下载链接
+                        const url = window.URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `ai-generated-image-${Date.now()}.${imageType}`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        window.URL.revokeObjectURL(url);
+                        
+                        showAlert('图片下载成功', 'success');
+                        return;
+                    }
+                }
+
+                // 如果是网络图片，先获取然后下载
+                const response = await fetch(imageData);
+                if (!response.ok) {
+                    throw new Error('无法获取图片');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `ai-generated-image-${Date.now()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                showAlert('图片下载成功', 'success');
+            } catch (error) {
+                console.error('下载图片时出错:', error);
+                showAlert(`下载失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 保存到历史记录（优化版）
+        async function saveToHistory(prompt = '', imageData = '', isTextResult = false) {
+            if (!prompt) {
+                prompt = document.getElementById('prompt').value;
+            }
+
+            let historyItem;
+            if (isTextResult) {
+                historyItem = {
+                    id: Date.now(),
+                    prompt: prompt,
+                    imageUrl: 'https://via.placeholder.com/200x200/ffc107/ffffff?text=Text',
+                    timestamp: new Date().toLocaleString(),
+                    status: 'text_response',
+                    type: 'text'
+                };
+            } else if (imageData) {
+                let thumbnailUrl;
+                try {
+                    if (imageData.startsWith('http')) {
+                        // For URLs, we don't need to generate a thumbnail, just use the URL directly.
+                        thumbnailUrl = imageData;
+            } else {
+                        // For Base64 data, generate a thumbnail to save space.
+                        thumbnailUrl = await generateThumbnail(imageData);
+                    }
+                historyItem = {
+                    id: Date.now(),
+                    prompt: prompt,
+                        imageUrl: thumbnailUrl, // Save the URL or the generated thumbnail URL
+                    timestamp: new Date().toLocaleString(),
+                    status: 'success',
+                    type: 'image'
+                };
+                } catch (error) {
+                    console.error('Failed to prepare image for history:', error);
+                    showAlert('保存历史记录失败', 'error');
+                    return;
+                }
+            } else {
+                showAlert('无法保存到历史记录：无有效数据', 'error');
+                return;
+            }
+
+            // 限制历史记录数量
+            const MAX_HISTORY_ITEMS = 30;
+            if (historyData.length >= MAX_HISTORY_ITEMS) {
+                historyData.pop(); // 移除最旧的记录
+            }
+
+            historyData.unshift(historyItem);
+            
+            try {
+                localStorage.setItem('aiImageHistory', JSON.stringify(historyData));
+            const resultType = isTextResult ? '文本响应' : '图片';
+            showAlert(`已保存${resultType}到历史记录`, 'success');
+            } catch (error) {
+                console.error('保存历史记录失败:', error);
+                showAlert('保存历史记录失败：存储空间可能已满。', 'error');
+                // 如果仍然失败，尝试清理更多旧记录
+                if (error.name === 'QuotaExceededError' && historyData.length > 1) {
+                    historyData.splice(-5); // 移除5个最旧的记录
+                    try {
+                        localStorage.setItem('aiImageHistory', JSON.stringify(historyData));
+                        showAlert('已清理部分旧记录并成功保存。', 'success');
+                    } catch (e) {
+                        showAlert('清理旧记录后仍无法保存，请手动清理历史记录。', 'error');
+                    }
+                }
+            }
+        }
+
+        // 加载历史记录（相册模式）
+        function loadHistory() {
+            const gallery = document.getElementById('historyGallery');
+            const savedHistory = localStorage.getItem('aiImageHistory');
+            
+            if (savedHistory) {
+                historyData = JSON.parse(savedHistory);
+            }
+
+            if (historyData.length === 0) {
+                gallery.innerHTML = `
+                    <div style="text-align: center; color: #666; padding: 40px; grid-column: 1 / -1;">
+                        <i class="fas fa-images" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p>相册是空的，快去创作吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            gallery.innerHTML = historyData.map(item => `
+                <div class="gallery-item">
+                    <img src="${item.imageUrl}" alt="${item.prompt.substring(0, 30)}" onclick="openModal(${item.id})">
+                    <div class="gallery-info">
+                        <p class="gallery-prompt">${item.prompt}</p>
+                        <div class="gallery-actions">
+                            <button class="btn btn-secondary" onclick="copyPrompt(${item.id})"><i class="fas fa-copy"></i> 复制</button>
+                            <button class="btn btn-secondary" onclick="deleteHistoryItem(${item.id})" style="background: #c82333;"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 删除历史记录项
+        function deleteHistoryItem(id) {
+            historyData = historyData.filter(item => item.id !== id);
+            localStorage.setItem('aiImageHistory', JSON.stringify(historyData));
+            loadHistory();
+            showAlert('已删除历史记录', 'success');
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有相册记录吗？此操作不可撤销。')) {
+                historyData = [];
+                localStorage.removeItem('aiImageHistory');
+                loadHistory();
+                showAlert('相册已清空', 'success');
+            }
+        }
+
+        // 复制提示词
+        function copyPrompt(id) {
+            const item = historyData.find(item => item.id === id);
+            if (item) {
+                navigator.clipboard.writeText(item.prompt).then(() => {
+                    showAlert('提示词已复制到剪贴板', 'success');
+                }, () => {
+                    showAlert('复制失败', 'error');
+                });
+            }
+        }
+
+        // 打开大图预览
+        function openModal(id) {
+            const item = historyData.find(item => item.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('imageModal');
+            const modalBody = document.getElementById('modalBody');
+
+            modalBody.innerHTML = `
+                <div class="modal-image-container">
+                    <img src="${item.imageUrl}" alt="${item.prompt.substring(0, 50)}">
+                </div>
+                <div class="modal-details">
+                    <h3>创作详情</h3>
+                    <div class="form-group">
+                        <label>提示词</label>
+                        <textarea class="form-control" rows="8" readonly>${item.prompt}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>创作时间</label>
+                        <p>${item.timestamp}</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyPrompt(${item.id})"><i class="fas fa-copy"></i> 复制提示词</button>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // 关闭大图预览
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        // 清空历史记录
+        function clearHistory() {
+            if (confirm('确定要清空所有相册记录吗？此操作不可撤销。')) {
+                historyData = [];
+                localStorage.removeItem('aiImageHistory');
+                loadHistory();
+                showAlert('相册已清空', 'success');
+            }
+        }
+
+        // 复制提示词
+        function copyPrompt(id) {
+            const item = historyData.find(item => item.id === id);
+            if (item) {
+                navigator.clipboard.writeText(item.prompt).then(() => {
+                    showAlert('提示词已复制到剪贴板', 'success');
+                }, () => {
+                    showAlert('复制失败', 'error');
+                });
+            }
+        }
+
+        // 打开大图预览
+        function openModal(id) {
+            const item = historyData.find(item => item.id === id);
+            if (!item) return;
+
+            const modal = document.getElementById('imageModal');
+            const modalBody = document.getElementById('modalBody');
+
+            modalBody.innerHTML = `
+                <div class="modal-image-container">
+                    <img src="${item.imageUrl}" alt="${item.prompt.substring(0, 50)}">
+                </div>
+                <div class="modal-details">
+                    <h3>创作详情</h3>
+                    <div class="form-group">
+                        <label>提示词</label>
+                        <textarea class="form-control" rows="8" readonly>${item.prompt}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>创作时间</label>
+                        <p>${item.timestamp}</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="copyPrompt(${item.id})"><i class="fas fa-copy"></i> 复制提示词</button>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // 关闭大图预览
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        function updateModelIndicator(modelName) {
+            const indicator = document.getElementById('modelIndicator');
+            if (modelName === 'nano-banana') {
+                indicator.textContent = 'Nano Banana';
+                indicator.className = 'model-indicator nano-banana';
+            } else {
+                indicator.textContent = 'Gemini Flash';
+                indicator.className = 'model-indicator gemini';
+            }
+        }
+
+        // 保存设置
+        function saveSettings() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const modelName = document.getElementById('modelName').value;
+            const maxTokens = document.getElementById('maxTokens').value;
+            const temperature = document.getElementById('temperature').value;
+            const debugMode = document.getElementById('debugMode').checked;
+
+            if (!apiUrl || !apiKey) {
+                showAlert('请填写完整的API配置信息', 'error');
+                return;
+            }
+
+            const settings = {
+                apiUrl,
+                apiKey,
+                modelName,
+                maxTokens,
+                temperature,
+                debugMode
+            };
+
+            localStorage.setItem('aiImageSettings', JSON.stringify(settings));
+            showAlert('设置已保存', 'success');
+            updateModelIndicator(modelName); // Update indicator on save
+        }
+
+        // 加载设置
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('aiImageSettings');
+            let currentModel = 'gemini-2.5-flash-image-preview';
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('apiUrl').value = settings.apiUrl || '';
+                document.getElementById('apiKey').value = settings.apiKey || '';
+                document.getElementById('modelName').value = settings.modelName || 'gemini-2.5-flash-image-preview';
+                document.getElementById('maxTokens').value = settings.maxTokens || 1000;
+                document.getElementById('temperature').value = settings.temperature || 0.7;
+                document.getElementById('debugMode').checked = settings.debugMode || false;
+                currentModel = settings.modelName || 'gemini-2.5-flash-image-preview';
+            }
+            updateModelIndicator(currentModel); // Update indicator on load
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            loadHistory();
+            loadPromptTemplates();
+            
+            // 自动检查API状态
+            setTimeout(() => {
+                // autoCheckApiStatus();
+            }, 1000);
+        });
+
+        // 自动检查API状态
+        async function autoCheckApiStatus() {
+            const settings = getSettings();
+            if (settings.apiUrl && settings.apiKey) {
+                // 静默检查，不显示提示
+                try {
+                    const testRequest = {
+                        model: "gemini-2.5-flash-image-preview",
+                        messages: [
+                            {
+                                role: "user",
+                                content: "test"
+                            }
+                        ],
+                        max_tokens: 5,
+                        temperature: 0.7,
+                        stream: false
+                    };
+
+                    const response = await fetch(settings.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${settings.apiKey}`
+                        },
+                        body: JSON.stringify(testRequest)
+                    });
+
+                    const statusIndicator = document.getElementById('statusIndicator');
+                    if (response.ok) {
+                        statusIndicator.textContent = '连接正常';
+                        statusIndicator.className = 'status-indicator status-success';
+                    } else {
+                        statusIndicator.textContent = '连接异常';
+                        statusIndicator.className = 'status-indicator status-error';
+                    }
+                } catch (error) {
+                    const statusIndicator = document.getElementById('statusIndicator');
+                    statusIndicator.textContent = '连接失败';
+                    statusIndicator.className = 'status-indicator status-error';
+                }
+            }
+        }
+    </script>
+</body>
+</html> = document.getElementById('statusIndicator');
+                    if (response.ok) {
+                        statusIndicator.textContent = '连接正常';
+                        statusIndicator.className = 'status-indicator status-success';
+                    } else {
+                        statusIndicator.textContent = '连接异常';
+                        statusIndicator.className = 'status-indicator status-error';
+                    }
+                } catch (error) {
+                    const statusIndicator = document.getElementById('statusIndicator');
+                    statusIndicator.textContent = '连接失败';
+                    statusIndicator.className = 'status-indicator status-error';
+                }
+            }
+        }
+    </script>
+</body>
+</html> 
